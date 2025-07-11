@@ -1,5 +1,9 @@
-This is a repository for Python-based programs in the Electron Force Field project.
+# Electron Force Field Project
 
-The Data folder contains files used to obtain data from the Computational Chemistry Comparison and Benchmark DataBase (https://cccbdb.nist.gov/).
+This repository contains Python-based programs developed as part of the Electron Force Field (EFF) project.
 
-The NeuralNetwork folder contains a file used to pretrain a neural network to replicate the best pairwise electron force field produced by our current MATLAB code.
+- **Data/**  
+  Contains files and scripts for acquiring and processing data from the Computational Chemistry Comparison and Benchmark DataBase (CCCBDB) hosted by NIST: [https://cccbdb.nist.gov/](https://cccbdb.nist.gov/).
+
+- **ML-EFF/**  
+  Contains files used to train and evaluate a machine-learned electron force field. This model is initialized using parameters derived from our existing spline-based electron force field, which is implemented in MATLAB.
