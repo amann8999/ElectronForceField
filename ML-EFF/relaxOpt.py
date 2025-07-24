@@ -47,7 +47,7 @@ def relaxBatch(mol_batch, model, diff_keys=['ra','rb','wb']):
     return full_batch_final, e_final
 
 
-def relaxMolecule(mol, model, diff_keys=['ra','rb','wb']):
+def relaxSingle(mol, model, diff_keys=['ra','rb','wb']):
 
     diff_mol = {k: mol[k] for k in diff_keys}
     static_mol = {k: mol[k] for k in mol if k not in diff_keys}
