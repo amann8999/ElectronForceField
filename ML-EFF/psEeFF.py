@@ -18,7 +18,7 @@ def get_zval(x):
 
 def Exact_AA(x):
     mask = x[2] > 1e-8
-    r = x[2] + 1e-8
+    r = x[2]
     out = get_zval(x[0]) * get_zval(x[1]) / r
     return jnp.where(mask, out, 0.0)
 
@@ -26,18 +26,36 @@ def Exact_AA(x):
 def Exact_AE(x):
     mask = x[2] > 1e-8
     z = get_zval(x[0])
-    rw = x[1] + 1e-8
-    w = x[2] + 1e-8
+    rw = x[1]
+    w = x[2]
     out = -z / (rw*w) * erf(rw / jnp.sqrt(2))
     return jnp.where(mask, out, 0.0)
 
 
 def Exact_EE(x):
     mask = x[2] > 1e-8
-    rw = x[0] + 1e-8
-    wij = x[1] + 1e-8
+    rw = x[0]
+    wij = x[1]
     out = 1 / (rw*wij) * erf(rw / jnp.sqrt(2))
     return jnp.where(mask, out, 0.0)
+
+
+class AA(eqx.Module):
+    embed: eqx.nn.Embedding
+    net: eqx.nn.MLP
+    
+    def __init__(self, key, embed_dim=4, hidden_dim=10, depth=3, Z_max=18):
+        k1, k2 = jax.random.split(key)
+        self.embed = eqx.nn.Embedding(Z_max, embed_dim, key=k1)
+        self.net = eqx.nn.MLP(2 * embed_dim + 1, 1, hidden_dim, depth, key=k2, activation=jax.nn.gelu)
+        
+    def __call__(self, x):
+        Z1, Z2 = x[0], x[1]
+        zvec1 = self.embed((Z1 - 1).astype(int))
+        zvec2 = self.embed((Z2 - 1).astype(int))
+        features = jnp.concatenate([zvec1, zvec2, x[2:3]])
+        raw = self.net(features)
+        return jnp.where(x[0]>1e-8, YuOfYs(raw), 0.0)
 
 
 class AE(eqx.Module):
@@ -51,7 +69,7 @@ class AE(eqx.Module):
 
     def __call__(self, x):
         Z = x[0]
-        zvec = self.embed(jnp.int32(Z) - 1)
+        zvec = self.embed((Z - 1).astype(int))
         features = jnp.concatenate([zvec, x[1:2], jnp.log(x[2:3])])
         raw = self.net(features)
         return jnp.where(x[2] > 1e-8, YuOfYs(raw), 0.0)
@@ -77,7 +95,7 @@ class E(eqx.Module):
 
     def __call__(self, x):
         mask = x[0] > 1e-8
-        w = x[0] + 1e-8
+        w = x[0]
         out = self.net(x) / w ** 2
         return jnp.where(mask, YuOfYs(out), 0.0)
 
@@ -97,6 +115,7 @@ class A(eqx.Module):
 
 
 class EnergyModel(eqx.Module):
+    aa: AA
     ae: AE
     ee_same: EE
     ee_opp: EE
@@ -108,12 +127,22 @@ class EnergyModel(eqx.Module):
     interp_e_fn: callable
 
     def __init__(self, key, interp_ae, interp_ee_same, interp_ee_opp, interp_e):
-        keys = jax.random.split(key, 22)
-        self.ae = AE(keys[0])
-        self.ee_same = EE(keys[1])
-        self.ee_opp = EE(keys[2])
-        self.e = E(keys[3])
-        self.a = eqx.tree_deserialise_leaves('a.eqx',A(keys[4]))
+        keys = jax.random.split(key, 6)
+
+        self.aa = AA(keys[0])
+        self.ae = AE(keys[1])
+        self.ee_same = EE(keys[2])
+        self.ee_opp = EE(keys[3])
+        self.e = E(keys[4])
+        self.a = A(keys[5])
+
+#        self.aa = eqx.tree_deserialise_leaves('aa.eqx',AA(keys[0]))
+#        self.ae = eqx.tree_deserialise_leaves('ae.eqx',AE(keys[1]))
+#        self.ee_same = eqx.tree_deserialise_leaves('ees.eqx',EE(keys[2]))
+#        self.ee_opp = eqx.tree_deserialise_leaves('eeo.eqx',EE(keys[3]))
+#        self.e = eqx.tree_deserialise_leaves('e.eqx',E(keys[4]))
+#        self.a = eqx.tree_deserialise_leaves('a.eqx',A(keys[5]))
+
         self.interp_ae_fn = interp_ae
         self.interp_ee_same_fn = interp_ee_same
         self.interp_ee_opp_fn = interp_ee_opp
@@ -124,6 +153,7 @@ class EnergyModel(eqx.Module):
         feature_dict = mol2feature(mol_dict)
 
         if 'aa' in feature_dict:
+            E += jnp.sum(jax.vmap(self.aa)(feature_dict['aa']))
             E += jnp.sum(jax.vmap(Exact_AA)(feature_dict['aa']))
 
         if 'ae' in feature_dict:
