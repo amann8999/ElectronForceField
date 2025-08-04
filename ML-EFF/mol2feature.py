@@ -3,19 +3,29 @@ import jax.numpy as jnp
 
 
 def mol2feature(mol):
+    '''
+    Converts molecule dictionary to feature dictionary.
+    Input:
+        mol: molecule dictionary with keys ‘za’, ‘ra’, ‘rb’, ‘wb’, and ‘sb’
+    Output:
+        feature_dict: feature dictionary with keys 'aa', 'ae', 'ee_same', 'ee_opp', 'a', and 'e'
+    '''
     max_na = jnp.size(mol['za']); max_nb = jnp.size(mol['sb'])
     na = jnp.count_nonzero(mol['za']); nb = jnp.count_nonzero(mol['sb'])
     
     feature_dict = dict()
     
     def get_aa_features(pair):
+        # Generates features for atom-atom interactions
         i, j = pair
         rij = mol['ra'][:, i] - mol['ra'][:, j] + 1e-8
         dij = jnp.linalg.norm(rij)
-        z1, z2 = mol['za'][i], mol['za'][j]
-        return jnp.where((z1 != 0) & (z2 != 0), jnp.array([z1, z2, dij]), jnp.zeros(3))
+        zmin = jnp.minimum(mol['za'][i], mol['za'][j])
+        zmax = jnp.maximum(mol['za'][i], mol['za'][j])
+        return jnp.where((zmin != 0) & (zmax != 0), jnp.array([zmin, zmax, dij]), jnp.zeros(3))
 
     def get_ae_features(pair):
+        # Generates features for atom-electron interactions
         i, j = pair
         j1 = mol['sb'][j]
         z = mol['za'][i]
@@ -26,6 +36,7 @@ def mol2feature(mol):
         return jnp.where((z != 0) & (j1 != 0), feat, jnp.zeros_like(feat))
 
     def get_ee_same_features(pair):
+        # Generates features for electron-electron (same spin) interactions
         i, j = pair
         i1 = mol['sb'][i]
         j1 = mol['sb'][j]
@@ -38,6 +49,7 @@ def mol2feature(mol):
         return jnp.where((i1 - j1 == 0) & (i1 != 0) & (j1 != 0), feat, jnp.zeros_like(feat))
 
     def get_ee_opp_features(pair):
+        # Generates features for electron-electron (opposite spin) interactions
         i, j = pair
         i1 = mol['sb'][i]
         j1 = mol['sb'][j]
@@ -50,12 +62,14 @@ def mol2feature(mol):
         return jnp.where((i1 + j1 == 0) & (i1 != 0) & (j1 != 0), feat, jnp.zeros_like(feat))
 
     def get_a_features(i):
+        # Generates features for atomic self-interactions (nucleus+core)
         z = mol['za'][i]
         feat = jnp.zeros(18).at[z-1].add(1)
         return jnp.where(z != 0, feat, jnp.zeros_like(feat))
 
     def get_e_features(i):
-        w = mol['wb'][i]
+        # Generates features for electronic self-interactions (Kinetic Energy)
+        w = mol['wb'][i] + 1e-8
         return jnp.where(w != 0, jnp.array([w]), jnp.zeros(1))
     
     ia = jnp.arange(max_na); ib = jnp.arange(max_nb)

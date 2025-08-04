@@ -1,3 +1,5 @@
+# Creates molName: a list of different sets of molecule names
+
 molName = []
 
 # 0: All atoms (18)

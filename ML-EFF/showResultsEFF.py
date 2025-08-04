@@ -17,9 +17,9 @@ def plotCorrelations(molEFF, molExp, eExp, wExp, model):
                                -341.28625, -398.13928, -460.17532, -527.56])
 
     # Without Single Atom Energy
-    # atom_energies = jnp.array([0.0, -0.40030938, -2.540257, -0.22085778, -0.96117324, -2.3490138, -4.766742, \
-    #                            -8.651527, -14.117482, -20.831747, -31.402018, -0.21249142, -0.7910681, -1.9613779, \
-    #                            -3.509399, -5.8452907, -9.226815, -13.974816, -19.952742])
+#    atom_energies = jnp.array([0.0, -0.40030938, -2.540257, -0.22085778, -0.96117324, -2.3490138, -4.766742, \
+#                               -8.651527, -14.117482, -20.831747, -31.402018, -0.21249142, -0.7910681, -1.9613779, \
+#                               -3.509399, -5.8452907, -9.226815, -13.974816, -19.952742])
 
     eEFF = jax.vmap(model)(molEFF)
 
@@ -42,25 +42,25 @@ def plotCorrelations(molEFF, molExp, eExp, wExp, model):
     plt.figure()
 
     plt.plot(jnp.arange(14), jnp.arange(14), 'k')
-    #plt.plot(featExp['ee_same'][:,:,-3], featEFF['ee_same'][:,:,-3], 'g.')
-    #plt.plot(featExp['ee_opp'][:,:,-3], featEFF['ee_opp'][:,:,-3], 'g.')
-    #plt.plot(featExp['ae'][:,:,-2], featEFF['ae'][:,:,-2], 'r.')
+    plt.plot(featExp['ee_same'][:,:,-3], featEFF['ee_same'][:,:,-3], 'm.')
+    plt.plot(featExp['ee_opp'][:,:,-3], featEFF['ee_opp'][:,:,-3], 'c.')
+    plt.plot(featExp['ae'][:,:,-2], featEFF['ae'][:,:,-2], 'r.')
     plt.plot(featExp['aa'][:,:,-1], featEFF['aa'][:,:,-1], 'b.')
-    plt.xlabel('Exp. Bond Distance (Bohr)')
-    plt.ylabel('ML-EFF Bond Distance (Bohr)')
+    plt.xlabel('Exp. Distance (Bohr)')
+    plt.ylabel('ML-EFF Distance (Bohr)')
     plt.xlim(0,8)
     plt.ylim(0,8)
     plt.grid()
 
-    #plt.figure()
+    plt.figure()
 
-    #plt.plot(jnp.arange(4), jnp.arange(4), 'k')
-    #plt.plot(featExp['e'][:,:,-1], featEFF['e'][:,:,-1], 'b.')
-    #plt.xlabel('Exp. Electron Width (Bohr)')
-    #plt.ylabel('ML-EFF Electron Width (Bohr)')
-    #plt.xlim(0.5,2.5)
-    #plt.ylim(0.5,2.5)
-    #plt.grid()
+    plt.plot(jnp.arange(4), jnp.arange(4), 'k')
+    plt.plot(featExp['e'][:,:,-1], featEFF['e'][:,:,-1], 'b.')
+    plt.xlabel('Exp. Electron Width (Bohr)')
+    plt.ylabel('ML-EFF Electron Width (Bohr)')
+    plt.xlim(0.5,2.5)
+    plt.ylim(0.5,2.5)
+    plt.grid()
 
     plt.figure()
 

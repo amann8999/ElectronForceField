@@ -6,6 +6,15 @@ from molSet import molName
 
 
 def mat2jax(matdata, molSet):
+    '''
+    Converts matdata into a list of Python dictionaries with JAX arrays.
+    
+    Inputs:
+        matdata: list of molecule dictionaries generated from scipy.io.loadmat
+        molSet (int): specifies molecule set from molSet.py
+    Output:
+        jaxdata: list of molecule dictionaries with JAX arrays for specified molecule set
+    '''
     matdata = [item for item in matdata if ('formationEnthalpy0K' in item) and (item['name'] in molName[molSet])]
     jaxdata = [dict() for item in matdata]
     for i in range(len(matdata)):
@@ -24,6 +33,17 @@ def mat2jax(matdata, molSet):
 
 
 def data2mol(data, energy_field='formationEnthalpy0K'):
+    '''
+    Converts list of dictionaries to a single, padded batched dictionary.
+    
+    Inputs:
+        data: list of molecule dictionaries
+        energy_field: energy key in molecule dictionary
+    Outputs:
+        mol_dict: Batched dictionary with keys ‘za’, ‘ra’, ‘rb’, ‘wb’, and ‘sb’
+        E: Array of Energies
+        W: Array of Atomic Vibrations
+    '''
     max_za = max([len(mol['za']) for mol in data])
     max_sb = max([len(mol['sb']) for mol in data])
     max_nw = max([len(mol['vibrations']) for mol in data])

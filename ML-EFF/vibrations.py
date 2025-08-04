@@ -42,7 +42,7 @@ def vibrations(mol, model):
 
     M = jnp.sqrt(mass_vec[:, None] * mass_vec[None, :])
 
-    w2, v = jnp.linalg.eigh(H / M)
+    w2, v = jnp.linalg.eigh(H/M)
 
     iva = jnp.argsort(-jnp.sum(v[:3*na] ** 2, axis=0))[:3*na]
     ivb = jnp.argsort(jnp.sum(v[:3*na] ** 2, axis=0))[:4*nb]

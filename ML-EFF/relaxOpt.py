@@ -4,7 +4,7 @@ from jax.flatten_util import ravel_pytree
 import jaxopt
 
 
-def relaxBatch(mol_batch, model, diff_keys=['ra','rb','wb']):
+def relaxBatch(mol_batch, model, diff_keys=['ra','rb','wb'], maxiter=1000):
     # === Step 1: Separate static and differentiable keys ===
     diff = {k: mol_batch[k] for k in diff_keys}
     static = {k: mol_batch[k] for k in mol_batch if k not in diff_keys}
@@ -31,7 +31,7 @@ def relaxBatch(mol_batch, model, diff_keys=['ra','rb','wb']):
     opt = jaxopt.LBFGS(
         fun=safe_value_and_grad(total_energy),
         value_and_grad=True,
-        maxiter=20,
+        maxiter=maxiter,
         unroll=True
     )
     result = opt.run(flat_diff)
@@ -47,7 +47,7 @@ def relaxBatch(mol_batch, model, diff_keys=['ra','rb','wb']):
     return full_batch_final, e_final
 
 
-def relaxSingle(mol, model, diff_keys=['ra','rb','wb']):
+def relaxSingle(mol, model, diff_keys=['ra','rb','wb'], maxiter=1000):
 
     diff_mol = {k: mol[k] for k in diff_keys}
     static_mol = {k: mol[k] for k in mol if k not in diff_keys}
@@ -58,7 +58,7 @@ def relaxSingle(mol, model, diff_keys=['ra','rb','wb']):
         full_mol = {**mol_diff, **static_mol}
         return model(full_mol)
 
-    opt = jaxopt.LBFGS(fun=wrapped_model, maxiter = 100)
+    opt = jaxopt.LBFGS(fun=wrapped_model, maxiter = maxiter)
     result = opt.run(flat_diff)
     flat_diff_final = result.params
     mol_diff_final = unravel_fn(flat_diff_final)
