@@ -90,7 +90,7 @@ molName.append(['H1', 'F1', 'OH', 'He1+', 'H2+', \
                 'NH4+', 'CH2NH+', 'NH2NN+', 'CH3O+', 'NH2OH+', 'H3O2+', 'H2COO+', 'CH3F+', 'NF3H+', 'PH4+',  \
                 'H2CSH+', 'C4H2+', 'N2H4+', 'CH3CN+', 'NCNH3+', 'CH3OH+', 'CH3CO+', 'CH3OO+', 'SiH5+',  \
                 'CH3SH+', 'H1-', 'BeH-', 'OH-', 'SiH-', 'PH-', 'HS-', 'BH2-', 'CH2-', 'C2H-',  \
-                'HCO-', 'FHF-', 'AlH2-', 'SiH2-', 'PH2-', 'HCS-', 'HNS-', 'CH3-', 'HCCH-', 'H2CO-',  \
+                'HCO-', 'AlH2-', 'SiH2-', 'PH2-', 'HCS-', 'HNS-', 'CH3-', 'HCCH-', 'H2CO-',  \
                 'HCO2-', 'SiH3-', 'H2CS-', 'BH4-', 'C2H3-', 'CH3O-', 'AlH4-', 'CH3OO-', 'He1',  \
                 'Li1', 'Li2', 'LiBe', 'LiN', 'LiO', 'LiF', 'LiMg',  \
                 'LiAl', 'LiS', 'LiCl', 'Li2S', 'LiF+', 'LiNe+', 'Li2O+', 'LiO-',  \
